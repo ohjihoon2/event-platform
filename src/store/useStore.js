@@ -45,7 +45,18 @@ export const useStore = create((set, get) => ({
     get().fetchAllAdminApplications();
     return { success: true };
   },
-  resetPassword: async (email) => {
+  resetPassword: async (email, name) => {
+    // Verify name via RPC
+    const { data: nameMatches, error: rpcError } = await supabase.rpc('verify_admin_name', {
+      p_email: email,
+      p_name: name
+    });
+    
+    if (rpcError) throw new Error('이름 확인 중 오류가 발생했습니다: ' + rpcError.message);
+    if (!nameMatches) {
+      throw new Error('이메일과 이름이 일치하는 관리자 계정이 없습니다.');
+    }
+
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: window.location.origin + '/admin/update-password',
     });

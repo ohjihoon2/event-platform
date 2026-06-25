@@ -35,7 +35,11 @@ export default function UpdatePassword() {
       await supabase.auth.signOut(); // Ensure they have to log in manually again
       navigate('/admin/login');
     } catch (error) {
-      alert('오류가 발생했습니다: ' + error.message);
+      if (error.message && error.message.includes('New password should be different from the old password')) {
+        alert('이전과 동일한 비밀번호로는 변경할 수 없습니다. 새로운 비밀번호를 입력해주세요.');
+      } else {
+        alert('오류가 발생했습니다: ' + error.message);
+      }
     } finally {
       setLoading(false);
     }

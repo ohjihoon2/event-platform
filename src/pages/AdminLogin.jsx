@@ -19,6 +19,7 @@ export default function AdminLogin() {
   const [loading, setLoading] = useState(false);
   const [resetModalOpen, setResetModalOpen] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
+  const [resetName, setResetName] = useState('');
 
   if (isAdmin) return <Navigate to="/admin" replace />;
 
@@ -147,14 +148,18 @@ export default function AdminLogin() {
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}>
           <div style={{ backgroundColor: 'var(--color-surface)', padding: '2rem', borderRadius: '1.5rem', width: '100%', maxWidth: '400px', boxShadow: 'var(--shadow-lg)' }}>
             <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '1rem', color: '#1F2937' }}>비밀번호 찾기</h2>
-            <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', marginBottom: '1.5rem' }}>가입하신 이메일을 입력하시면 비밀번호 재설정 링크를 보내드립니다.</p>
-            <Input label="이메일" type="email" value={resetEmail} onChange={e => setResetEmail(e.target.value)} required placeholder="admin@example.com" />
+            <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', marginBottom: '1.5rem' }}>가입 시 입력하신 이름과 이메일을 정확히 입력해주세요.</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <Input label="가입한 이름" type="text" value={resetName} onChange={e => setResetName(e.target.value)} required placeholder="예: 홍길동" />
+              <Input label="이메일" type="email" value={resetEmail} onChange={e => setResetEmail(e.target.value)} required placeholder="admin@example.com" />
+            </div>
             <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1.5rem' }}>
               <Button variant="secondary" fullWidth onClick={() => setResetModalOpen(false)}>취소</Button>
               <Button fullWidth onClick={async () => {
+                if(!resetName) return alert('이름을 입력해주세요.');
                 if(!resetEmail) return alert('이메일을 입력해주세요.');
                 try {
-                  await resetPassword(resetEmail);
+                  await resetPassword(resetEmail, resetName);
                   alert('비밀번호 재설정 링크가 이메일로 발송되었습니다!');
                   setResetModalOpen(false);
                 } catch(e) {
