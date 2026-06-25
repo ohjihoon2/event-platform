@@ -28,14 +28,34 @@ export const useStore = create((set, get) => ({
       email, 
       password,
       options: {
-        data: { name }
+        data: { name },
+        emailRedirectTo: window.location.origin + '/admin/login'
       }
     });
     if (error) throw error;
-    // Auto-login after signup
+    
+    if (data.user && !data.session) {
+      // Email confirmation required
+      return { success: true, needsEmailVerification: true };
+    }
+    
+    // Auto-login after signup (if email confirmation is disabled)
     set({ isAdmin: true, adminUser: data.user });
     get().fetchForms();
     get().fetchAllAdminApplications();
+    return { success: true };
+  },
+  resetPassword: async (email) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + '/admin/update-password',
+    });
+    if (error) throw error;
+    return { success: true };
+  },
+  updatePassword: async (newPassword) => {
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) throw error;
+    return { success: true };
   },
   logout: async () => {
     await supabase.auth.signOut();

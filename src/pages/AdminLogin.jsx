@@ -3,11 +3,13 @@ import { Navigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
+import { CalendarDays, ClipboardList } from 'lucide-react';
 
 export default function AdminLogin() {
   const isAdmin = useStore(state => state.isAdmin);
   const login = useStore(state => state.login);
   const signup = useStore(state => state.signup);
+  const resetPassword = useStore(state => state.resetPassword);
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -15,6 +17,8 @@ export default function AdminLogin() {
   const [name, setName] = useState('');
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [resetModalOpen, setResetModalOpen] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
 
   if (isAdmin) return <Navigate to="/admin" replace />;
 
@@ -40,7 +44,12 @@ export default function AdminLogin() {
       if (isLoginMode) {
         await login(email, password);
       } else {
-        await signup(email, password, name);
+        const result = await signup(email, password, name);
+        if (result && result.needsEmailVerification) {
+          alert('가입하신 이메일로 인증 메일이 발송되었습니다. 이메일 안의 링크를 클릭하신 후 로그인해주세요!');
+          setIsLoginMode(true);
+          return;
+        }
         alert('회원가입이 완료되었습니다!');
       }
     } catch (error) {
@@ -48,6 +57,8 @@ export default function AdminLogin() {
         alert('이메일이나 비밀번호가 일치하지 않습니다.');
       } else if (error.message.includes('User already registered')) {
         alert('이미 가입된 이메일입니다.');
+      } else if (error.message.includes('Email not confirmed')) {
+        alert('이메일 인증이 아직 완료되지 않았습니다. 메일함에서 인증 링크를 클릭해주세요.');
       } else {
         alert('오류가 발생했습니다: ' + error.message);
       }
@@ -57,12 +68,27 @@ export default function AdminLogin() {
   };
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', backgroundColor: 'var(--color-bg)', padding: '1rem' }}>
-      <form onSubmit={handleSubmit} style={{ backgroundColor: 'white', padding: '3rem 2rem', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-md)', width: '100%', maxWidth: '400px' }}>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '2rem', textAlign: 'center', color: 'var(--color-primary)' }}>
-          관리자 {isLoginMode ? '로그인' : '회원가입'}
-        </h1>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)', padding: '1rem' }}>
+      <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(10px)', padding: '2.5rem 2rem', borderRadius: '1.5rem', width: '100%', maxWidth: '400px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+            <div style={{ backgroundColor: '#FEF3C7', padding: '0.75rem', borderRadius: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <CalendarDays size={28} color="#D97706" />
+            </div>
+            <div style={{ backgroundColor: '#EEF2FF', padding: '0.75rem', borderRadius: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <ClipboardList size={28} color="#4F46E5" />
+            </div>
+          </div>
+          <div style={{ fontSize: '0.875rem', fontWeight: '800', color: '#D97706', letterSpacing: '2px', marginBottom: '0.5rem' }}>EVENT MANAGER</div>
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 'bold', marginBottom: '0.5rem', textAlign: 'center', color: '#1F2937', lineHeight: '1.3' }}>
+            {!isLoginMode ? '관리자 회원가입' : '행사 관리 시스템 시작하기'}
+          </h1>
+          <p style={{ textAlign: 'center', color: '#6B7280', fontSize: '0.9rem', lineHeight: '1.5' }}>
+            나만의 참가 신청 폼을 만들고,<br/>수백 명의 신청자를 클릭 한 번으로 관리하세요.
+          </p>
+        </div>
+        
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {!isLoginMode && (
             <Input 
               label="이름 (관리자명)" 
@@ -85,9 +111,16 @@ export default function AdminLogin() {
             type="password"
             value={password} 
             onChange={(e) => setPassword(e.target.value)} 
-            placeholder="6자리 이상 입력" 
+            placeholder="••••••••" 
             required
           />
+          {isLoginMode && (
+            <div style={{ textAlign: 'right', marginTop: '-0.5rem' }}>
+              <button type="button" onClick={() => setResetModalOpen(true)} style={{ background: 'none', border: 'none', color: '#D97706', fontSize: '0.75rem', cursor: 'pointer', textDecoration: 'underline' }}>
+                비밀번호를 잊으셨나요?
+              </button>
+            </div>
+          )}
           {!isLoginMode && (
             <Input 
               label="비밀번호 확인" 
@@ -106,8 +139,32 @@ export default function AdminLogin() {
               {isLoginMode ? '계정이 없으신가요? 무료 회원가입' : '이미 계정이 있으신가요? 로그인'}
             </button>
           </div>
+        </form>
+      </div>
+
+      {/* Reset Password Modal */}
+      {resetModalOpen && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }}>
+          <div style={{ backgroundColor: 'var(--color-surface)', padding: '2rem', borderRadius: '1.5rem', width: '100%', maxWidth: '400px', boxShadow: 'var(--shadow-lg)' }}>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '1rem', color: '#1F2937' }}>비밀번호 찾기</h2>
+            <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', marginBottom: '1.5rem' }}>가입하신 이메일을 입력하시면 비밀번호 재설정 링크를 보내드립니다.</p>
+            <Input label="이메일" type="email" value={resetEmail} onChange={e => setResetEmail(e.target.value)} required placeholder="admin@example.com" />
+            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1.5rem' }}>
+              <Button variant="secondary" fullWidth onClick={() => setResetModalOpen(false)}>취소</Button>
+              <Button fullWidth onClick={async () => {
+                if(!resetEmail) return alert('이메일을 입력해주세요.');
+                try {
+                  await resetPassword(resetEmail);
+                  alert('비밀번호 재설정 링크가 이메일로 발송되었습니다!');
+                  setResetModalOpen(false);
+                } catch(e) {
+                  alert(e.message);
+                }
+              }}>메일 보내기</Button>
+            </div>
+          </div>
         </div>
-      </form>
+      )}
     </div>
   );
 }

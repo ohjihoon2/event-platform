@@ -5,6 +5,7 @@ import AdminLogin from './pages/AdminLogin';
 import FormBuilder from './pages/FormBuilder';
 import ApplicationForm from './pages/ApplicationForm';
 import Success from './pages/Success';
+import UpdatePassword from './pages/UpdatePassword';
 
 import FormManagement from './pages/FormManagement';
 import PrintPoster from './pages/PrintPoster';
@@ -26,6 +27,7 @@ function App() {
         
         {/* Admin Routes */}
         <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/update-password" element={<UpdatePassword />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/admin/builder/:formId?" element={<FormBuilder />} />
         <Route path="/admin/manage/:formId" element={<FormManagement />} />

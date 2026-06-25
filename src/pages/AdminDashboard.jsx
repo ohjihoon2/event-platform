@@ -36,32 +36,39 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="container-admin">
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>관리자 대시보드</h1>
+    <div className="container-admin" style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', backgroundColor: 'var(--color-surface)', padding: '1.5rem 2rem', borderRadius: '1rem', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+          <h1 style={{ fontSize: '1.75rem', fontWeight: 'bold', color: 'var(--color-primary)' }}>대시보드</h1>
+          <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>현재 <b>{forms.length}개</b>의 행사를 관리하고 있습니다.</span>
+        </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <span style={{ fontWeight: '500', color: 'var(--color-primary)' }}>
-            {adminUser?.user_metadata?.name || '관리자'}님 환영합니다
+          <span style={{ fontWeight: '500', backgroundColor: '#F3F4F6', padding: '0.5rem 1rem', borderRadius: '9999px', fontSize: '0.875rem' }}>
+            👤 {adminUser?.user_metadata?.name || '관리자'}님 환영합니다
           </span>
-          <Button variant="secondary" onClick={logout}>로그아웃</Button>
+          <Button variant="ghost" onClick={logout} style={{ color: 'var(--color-text-muted)', border: '1px solid #E5E7EB' }}>로그아웃</Button>
         </div>
       </header>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>내 행사 목록</h2>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <Button onClick={() => navigate('/admin/builder')}><PlusCircle size={20} style={{marginRight: '8px'}}/> 새 행사 만들기</Button>
-        </div>
+        <Button onClick={() => navigate('/admin/builder')} style={{ background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)', border: 'none', color: 'white', fontWeight: 'bold', boxShadow: '0 4px 14px 0 rgba(99, 102, 241, 0.39)' }}>
+          <PlusCircle size={20} style={{marginRight: '8px'}}/> 새 행사 만들기
+        </Button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
         {forms.length === 0 ? (
-          <p style={{ color: 'var(--color-text-muted)', gridColumn: '1 / -1', textAlign: 'center', padding: '3rem 0' }}>
-            생성된 행사가 없습니다. '새 행사 만들기' 버튼을 눌러 시작해보세요.
-          </p>
+          <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '5rem 0', backgroundColor: '#F9FAFB', borderRadius: '1rem', border: '1px dashed #D1D5DB' }}>
+            <div style={{ display: 'inline-flex', padding: '1.5rem', backgroundColor: '#EEF2FF', borderRadius: '50%', marginBottom: '1rem' }}>
+              <PlusCircle size={48} color="#6366f1" />
+            </div>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#374151', marginBottom: '0.5rem' }}>아직 생성된 행사가 없습니다.</h3>
+            <p style={{ color: '#6B7280', marginBottom: '1.5rem' }}>'새 행사 만들기' 버튼을 눌러 첫 번째 행사를 기획해보세요!</p>
+          </div>
         ) : (
           forms.map(form => (
-            <div key={form.id} style={{ backgroundColor: 'var(--color-surface)', padding: '1.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-sm)' }}>
+            <div key={form.id} style={{ backgroundColor: 'var(--color-surface)', padding: '1.5rem', borderRadius: '1.25rem', border: '1px solid #E5E7EB', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', transition: 'transform 0.2s, box-shadow 0.2s', cursor: 'default' }}>
               <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem', position: 'relative' }}>
                   <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
@@ -88,20 +95,20 @@ export default function AdminDashboard() {
                 <p style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem', marginBottom: '1rem', flexGrow: 1 }}>
                   {form.date ? new Date(form.date).toLocaleString() : '일시 미정'}
                 </p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', fontSize: '0.875rem' }}>
-                  <Users size={16} />
-                  <span>현재 신청: <strong>{getApplicationCount(form.id)}</strong>명 {form.capacity && `/ 정원 ${form.capacity}명`}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', fontSize: '0.875rem', backgroundColor: '#F3F4F6', padding: '0.5rem 0.75rem', borderRadius: '0.5rem' }}>
+                  <Users size={16} color="#4B5563" />
+                  <span style={{ color: '#4B5563' }}>현재 신청: <strong style={{ color: '#111827' }}>{getApplicationCount(form.id)}</strong>명 {form.capacity && `/ 정원 ${form.capacity}명`}</span>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <Button variant="secondary" size="sm" fullWidth onClick={() => setShareForm(form)}>
-                      <Share2 size={16} style={{marginRight: '4px'}}/> QR / 공유
+                    <Button variant="ghost" size="sm" fullWidth onClick={() => setShareForm(form)} style={{ border: '1px solid #D1D5DB' }}>
+                      <Share2 size={16} style={{marginRight: '4px'}}/> 공유
                     </Button>
-                    <Button variant="secondary" size="sm" fullWidth onClick={() => navigate(`/form/${form.id}`)}>
-                      <ExternalLink size={16} style={{marginRight: '4px'}}/> 미리보기
+                    <Button variant="ghost" size="sm" fullWidth onClick={() => navigate(`/form/${form.id}`)} style={{ border: '1px solid #D1D5DB' }}>
+                      <ExternalLink size={16} style={{marginRight: '4px'}}/> 폼 보기
                     </Button>
                   </div>
-                  <Button variant="primary" size="sm" fullWidth onClick={() => navigate(`/admin/manage/${form.id}`)}>
+                  <Button variant="primary" size="sm" fullWidth onClick={() => navigate(`/admin/manage/${form.id}`)} style={{ marginTop: '0.25rem' }}>
                     <Settings size={16} style={{marginRight: '4px'}}/> 신청자 관리하기
                   </Button>
                 </div>
