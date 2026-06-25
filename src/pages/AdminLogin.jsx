@@ -4,6 +4,7 @@ import { useStore } from '../store/useStore';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 import { CalendarDays, ClipboardList } from 'lucide-react';
+import { HelpGuideModal } from '../components/ui/HelpGuideModal';
 
 export default function AdminLogin() {
   const isAdmin = useStore(state => state.isAdmin);
@@ -20,6 +21,7 @@ export default function AdminLogin() {
   const [resetModalOpen, setResetModalOpen] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
   const [resetName, setResetName] = useState('');
+  const [guideModalOpen, setGuideModalOpen] = useState(false);
 
   if (isAdmin) return <Navigate to="/admin" replace />;
 
@@ -69,18 +71,15 @@ export default function AdminLogin() {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)', padding: '1rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: 'linear-gradient(135deg, #E0E7FF 0%, #C7D2FE 100%)', padding: '1rem' }}>
       <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(10px)', padding: '2.5rem 2rem', borderRadius: '1.5rem', width: '100%', maxWidth: '400px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-            <div style={{ backgroundColor: '#FEF3C7', padding: '0.75rem', borderRadius: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <CalendarDays size={28} color="#D97706" />
-            </div>
-            <div style={{ backgroundColor: '#EEF2FF', padding: '0.75rem', borderRadius: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <ClipboardList size={28} color="#4F46E5" />
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
+            <div style={{ backgroundColor: '#EEF2FF', padding: '1rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '80px', height: '80px', boxShadow: '0 4px 6px -1px rgba(99, 102, 241, 0.1)' }}>
+              <img src="/favicon.svg" alt="행사관리시스템 로고" style={{ width: '48px', height: '48px' }} />
             </div>
           </div>
-          <div style={{ fontSize: '0.875rem', fontWeight: '800', color: '#D97706', letterSpacing: '2px', marginBottom: '0.5rem' }}>EVENT MANAGER</div>
+          <div style={{ fontSize: '0.875rem', fontWeight: '800', color: '#4F46E5', letterSpacing: '2px', marginBottom: '0.5rem' }}>EVENT MANAGER</div>
           <h1 style={{ fontSize: '1.75rem', fontWeight: 'bold', marginBottom: '0.5rem', textAlign: 'center', color: '#1F2937', lineHeight: '1.3' }}>
             {!isLoginMode ? '관리자 회원가입' : '행사 관리 시스템 시작하기'}
           </h1>
@@ -117,7 +116,7 @@ export default function AdminLogin() {
           />
           {isLoginMode && (
             <div style={{ textAlign: 'right', marginTop: '-0.5rem' }}>
-              <button type="button" onClick={() => setResetModalOpen(true)} style={{ background: 'none', border: 'none', color: '#D97706', fontSize: '0.75rem', cursor: 'pointer', textDecoration: 'underline' }}>
+              <button type="button" onClick={() => setResetModalOpen(true)} style={{ background: 'none', border: 'none', color: 'var(--color-primary)', fontSize: '0.75rem', cursor: 'pointer', textDecoration: 'underline' }}>
                 비밀번호를 잊으셨나요?
               </button>
             </div>
@@ -138,6 +137,11 @@ export default function AdminLogin() {
           <div style={{ textAlign: 'center', marginTop: '1rem' }}>
             <button type="button" onClick={() => setIsLoginMode(!isLoginMode)} style={{ background: 'none', border: 'none', color: 'var(--color-text-muted)', fontSize: '0.875rem', cursor: 'pointer', textDecoration: 'underline' }}>
               {isLoginMode ? '계정이 없으신가요? 무료 회원가입' : '이미 계정이 있으신가요? 로그인'}
+            </button>
+          </div>
+          <div style={{ textAlign: 'center', marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid #E5E7EB' }}>
+            <button type="button" onClick={() => setGuideModalOpen(true)} style={{ background: 'none', border: 'none', color: 'var(--color-primary)', fontSize: '0.875rem', cursor: 'pointer', fontWeight: 'bold' }}>
+              ❓ 서비스 이용 가이드 보기
             </button>
           </div>
         </form>
@@ -170,6 +174,9 @@ export default function AdminLogin() {
           </div>
         </div>
       )}
+
+      {/* Help Guide Modal */}
+      {guideModalOpen && <HelpGuideModal onClose={() => setGuideModalOpen(false)} />}
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { ArrowLeft, Check, Clock, Edit, Trash2, PlusCircle, X } from 'lucide-react';
+import { ArrowLeft, Check, Clock, Edit, Trash2, PlusCircle, X, Users } from 'lucide-react';
 
 export default function FormManagement() {
   const { formId } = useParams();
@@ -38,6 +38,17 @@ export default function FormManagement() {
 
   const pendingCount = applications.filter(a => a.status === 'pending').length;
   const confirmedCount = applications.filter(a => a.status === 'confirmed').length;
+
+  const isFull = form.capacity && applications.length >= form.capacity;
+  const getStatusBadge = () => {
+    const status = form.status || 'open';
+    const baseStyle = { padding: '6px 10px', borderRadius: '6px', fontSize: '0.875rem', fontWeight: 'bold', whiteSpace: 'nowrap', marginLeft: '12px' };
+    
+    if (status === 'closed') return <span style={{ ...baseStyle, backgroundColor: '#FEE2E2', color: '#B91C1C' }}>모집 마감</span>;
+    if (isFull) return <span style={{ ...baseStyle, backgroundColor: '#FEF3C7', color: '#B45309' }}>정원 마감</span>;
+    
+    return <span style={{ ...baseStyle, backgroundColor: '#D1FAE5', color: '#059669' }}>모집 중</span>;
+  };
 
   const openModal = (app = null) => {
     if (app) {
@@ -89,56 +100,74 @@ export default function FormManagement() {
   };
 
   return (
-    <div className="container-admin">
-      <header style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginBottom: '2rem' }}>
-        <Button variant="ghost" onClick={() => navigate('/admin')}>
-          <ArrowLeft size={20} />
+    <div className="container-admin" style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', backgroundColor: 'var(--color-surface)', padding: '1.5rem 2rem', borderRadius: '1rem', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <button onClick={() => navigate('/admin')} style={{ backgroundColor: '#F3F4F6', border: 'none', borderRadius: '50%', padding: '0.5rem', width: '44px', height: '44px', display: 'flex', justifyContent: 'center', alignItems: 'center', cursor: 'pointer', transition: 'background-color 0.2s' }}>
+            <ArrowLeft size={20} color="#4B5563" />
+          </button>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+            <h1 style={{ fontSize: '1.75rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', color: 'var(--color-primary)' }}>
+              {form.title}
+              {getStatusBadge()}
+            </h1>
+            <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>신청자 현황 및 상세 내역을 관리합니다.</span>
+          </div>
+        </div>
+        <Button onClick={() => openModal()} style={{ background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)', border: 'none', color: 'white', fontWeight: 'bold', boxShadow: '0 4px 14px 0 rgba(99, 102, 241, 0.39)', padding: '0.75rem 1.5rem' }}>
+          <PlusCircle size={18} style={{marginRight: '8px'}}/> 수동 신청자 추가
         </Button>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{form.title} - 신청자 관리</h1>
       </header>
 
       {/* Stats Summary */}
-      <div className="stats-grid">
-        <div style={{ backgroundColor: 'var(--color-surface)', padding: '1.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', textAlign: 'center' }}>
-          <p style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>총 신청자</p>
-          <p style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--color-text-main)' }}>{applications.length}</p>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
+        <div style={{ background: 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)', padding: '2rem', borderRadius: '1.25rem', border: '1px solid #BFDBFE', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', top: '-10px', right: '-10px', opacity: 0.1 }}><Users size={100} /></div>
+          <p style={{ color: '#1E40AF', fontSize: '1rem', fontWeight: 'bold', marginBottom: '0.5rem', zIndex: 1 }}>총 신청자</p>
+          <p style={{ fontSize: '3rem', fontWeight: 'bold', color: '#1D4ED8', zIndex: 1 }}>{applications.length}</p>
         </div>
-        <div style={{ backgroundColor: 'var(--color-surface)', padding: '1.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', textAlign: 'center' }}>
-          <p style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>입금 대기</p>
-          <p style={{ fontSize: '2rem', fontWeight: 'bold', color: '#F59E0B' }}>{pendingCount}</p>
+        <div style={{ background: 'linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%)', padding: '2rem', borderRadius: '1.25rem', border: '1px solid #FDE68A', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', top: '-10px', right: '-10px', opacity: 0.1 }}><Clock size={100} /></div>
+          <p style={{ color: '#92400E', fontSize: '1rem', fontWeight: 'bold', marginBottom: '0.5rem', zIndex: 1 }}>입금 대기</p>
+          <p style={{ fontSize: '3rem', fontWeight: 'bold', color: '#B45309', zIndex: 1 }}>{pendingCount}</p>
         </div>
-        <div style={{ backgroundColor: 'var(--color-surface)', padding: '1.5rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', textAlign: 'center' }}>
-          <p style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>확정 완료</p>
-          <p style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--color-secondary)' }}>{confirmedCount}</p>
+        <div style={{ background: 'linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%)', padding: '2rem', borderRadius: '1.25rem', border: '1px solid #A7F3D0', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', top: '-10px', right: '-10px', opacity: 0.1 }}><Check size={100} /></div>
+          <p style={{ color: '#065F46', fontSize: '1rem', fontWeight: 'bold', marginBottom: '0.5rem', zIndex: 1 }}>확정 완료</p>
+          <p style={{ fontSize: '3rem', fontWeight: 'bold', color: '#047857', zIndex: 1 }}>{confirmedCount}</p>
         </div>
-      </div>
-
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
-        <Button onClick={() => openModal()}><PlusCircle size={18} style={{marginRight: '6px'}}/> 수동 신청자 추가</Button>
       </div>
 
       {/* Applications Table */}
-      <div style={{ backgroundColor: 'var(--color-surface)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', overflow: 'hidden' }}>
+      <div style={{ backgroundColor: 'var(--color-surface)', borderRadius: '1.25rem', border: '1px solid #E5E7EB', overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}>
+        <div style={{ padding: '1.5rem', borderBottom: '1px solid #E5E7EB', backgroundColor: '#F9FAFB' }}>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#111827' }}>신청자 목록</h2>
+        </div>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
-              <tr style={{ backgroundColor: 'var(--color-bg)', borderBottom: '1px solid var(--color-border)' }}>
-                <th style={{ padding: '1rem', fontWeight: '500', color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>신청일시</th>
-                <th style={{ padding: '1rem', fontWeight: '500', color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>이름</th>
-                <th style={{ padding: '1rem', fontWeight: '500', color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>연락처</th>
-                <th style={{ padding: '1rem', fontWeight: '500', color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>입금자명</th>
+              <tr style={{ backgroundColor: 'white', borderBottom: '2px solid #E5E7EB' }}>
+                <th style={{ padding: '1.25rem 1rem', fontWeight: '600', color: '#4B5563', fontSize: '0.875rem' }}>신청일시</th>
+                <th style={{ padding: '1.25rem 1rem', fontWeight: '600', color: '#4B5563', fontSize: '0.875rem' }}>이름</th>
+                <th style={{ padding: '1.25rem 1rem', fontWeight: '600', color: '#4B5563', fontSize: '0.875rem' }}>연락처</th>
+                <th style={{ padding: '1.25rem 1rem', fontWeight: '600', color: '#4B5563', fontSize: '0.875rem' }}>입금자명</th>
                 {form.fields && form.fields.map(f => (
-                  <th key={f.id} style={{ padding: '1rem', fontWeight: '500', color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>{f.label}</th>
+                  <th key={f.id} style={{ padding: '1.25rem 1rem', fontWeight: '600', color: '#4B5563', fontSize: '0.875rem' }}>{f.label}</th>
                 ))}
-                <th style={{ padding: '1rem', fontWeight: '500', color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>상태</th>
-                <th style={{ padding: '1rem', fontWeight: '500', color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>상태 변경</th>
-                <th style={{ padding: '1rem', fontWeight: '500', color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>관리</th>
+                <th style={{ padding: '1.25rem 1rem', fontWeight: '600', color: '#4B5563', fontSize: '0.875rem' }}>상태</th>
+                <th style={{ padding: '1.25rem 1rem', fontWeight: '600', color: '#4B5563', fontSize: '0.875rem' }}>상태 변경</th>
+                <th style={{ padding: '1.25rem 1rem', fontWeight: '600', color: '#4B5563', fontSize: '0.875rem', textAlign: 'center' }}>관리</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody style={{ backgroundColor: 'white' }}>
               {applications.length === 0 ? (
                 <tr>
-                  <td colSpan={10} style={{ padding: '3rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>아직 신청자가 없습니다.</td>
+                  <td colSpan={10} style={{ padding: '4rem', textAlign: 'center', color: '#6B7280' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+                      <Users size={48} color="#D1D5DB" />
+                      <p style={{ fontSize: '1.125rem' }}>아직 신청자가 없습니다.</p>
+                    </div>
+                  </td>
                 </tr>
               ) : (
                 applications.map(app => (
@@ -163,22 +192,22 @@ export default function FormManagement() {
                     </td>
                     <td style={{ padding: '1rem' }}>
                       {app.status === 'pending' ? (
-                        <Button size="sm" variant="primary" onClick={() => updateApplicationStatus(app.id, 'confirmed')}>
+                        <button onClick={() => updateApplicationStatus(app.id, 'confirmed')} style={{ backgroundColor: '#F3F4F6', color: '#111827', border: '1px solid #D1D5DB', padding: '6px 12px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}>
                           입금 확인
-                        </Button>
+                        </button>
                       ) : (
-                        <Button size="sm" variant="secondary" onClick={() => updateApplicationStatus(app.id, 'pending')}>
+                        <button onClick={() => updateApplicationStatus(app.id, 'pending')} style={{ backgroundColor: 'white', color: '#6B7280', border: '1px solid #E5E7EB', padding: '6px 12px', borderRadius: '6px', fontSize: '0.75rem', cursor: 'pointer', transition: 'all 0.2s' }}>
                           대기로 변경
-                        </Button>
+                        </button>
                       )}
                     </td>
                     <td style={{ padding: '1rem' }}>
-                      <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <button onClick={() => openModal(app)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-muted)' }} title="수정">
-                          <Edit size={18} />
+                      <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+                        <button onClick={() => openModal(app)} style={{ backgroundColor: '#F3F4F6', border: 'none', cursor: 'pointer', color: '#4B5563', padding: '8px', borderRadius: '6px', transition: 'background-color 0.2s' }} title="수정" onMouseOver={e=>e.currentTarget.style.backgroundColor='#E5E7EB'} onMouseOut={e=>e.currentTarget.style.backgroundColor='#F3F4F6'}>
+                          <Edit size={16} />
                         </button>
-                        <button onClick={() => handleDelete(app.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-danger)' }} title="삭제">
-                          <Trash2 size={18} />
+                        <button onClick={() => handleDelete(app.id)} style={{ backgroundColor: '#FEF2F2', border: 'none', cursor: 'pointer', color: '#DC2626', padding: '8px', borderRadius: '6px', transition: 'background-color 0.2s' }} title="삭제" onMouseOver={e=>e.currentTarget.style.backgroundColor='#FEE2E2'} onMouseOut={e=>e.currentTarget.style.backgroundColor='#FEF2F2'}>
+                          <Trash2 size={16} />
                         </button>
                       </div>
                     </td>

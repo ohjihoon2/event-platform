@@ -248,7 +248,11 @@ export default function ApplicationForm() {
                   <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>모집 인원</p>
                   <p style={{ fontWeight: '500' }}>
                     <span style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>{currentCount}명</span> / {form.capacity}명 
-                    {currentCount >= Number(form.capacity) && <span style={{ marginLeft: '8px', fontSize: '0.75rem', backgroundColor: '#FEE2E2', color: '#DC2626', padding: '2px 6px', borderRadius: '4px' }}>마감</span>}
+                    {form.status === 'closed' ? (
+                      <span style={{ marginLeft: '8px', fontSize: '0.75rem', backgroundColor: '#FEE2E2', color: '#B91C1C', padding: '2px 6px', borderRadius: '4px' }}>모집 마감</span>
+                    ) : currentCount >= Number(form.capacity) ? (
+                      <span style={{ marginLeft: '8px', fontSize: '0.75rem', backgroundColor: '#FEF3C7', color: '#B45309', padding: '2px 6px', borderRadius: '4px' }}>정원 마감</span>
+                    ) : null}
                   </p>
                 </div>
               </div>
@@ -272,8 +276,10 @@ export default function ApplicationForm() {
         <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '1.5rem', color: 'var(--color-text-main)' }}>참가 신청하기</h2>
         
         {form.status === 'closed' || (form.capacity && currentCount >= Number(form.capacity)) ? (
-          <div style={{ textAlign: 'center', padding: '4rem 1rem', backgroundColor: '#FEF2F2', borderRadius: '1rem', border: '1px solid #FCA5A5', color: '#991B1B' }}>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>모집이 마감되었습니다</h2>
+          <div style={{ textAlign: 'center', padding: '4rem 1rem', backgroundColor: form.status === 'closed' ? '#FEF2F2' : '#FFFBEB', borderRadius: '1rem', border: '1px solid', borderColor: form.status === 'closed' ? '#FCA5A5' : '#FCD34D', color: form.status === 'closed' ? '#991B1B' : '#B45309' }}>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>
+              {form.status === 'closed' ? '모집이 마감되었습니다' : '정원이 모두 마감되었습니다'}
+            </h2>
             <p>보내주신 성원에 감사드립니다.</p>
           </div>
         ) : (

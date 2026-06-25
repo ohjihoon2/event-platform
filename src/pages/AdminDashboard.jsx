@@ -3,7 +3,8 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { Button } from '../components/ui/Button';
 import { ShareModal } from '../components/ui/ShareModal';
-import { PlusCircle, Share2, Settings, Users, ExternalLink, MoreVertical } from 'lucide-react';
+import { HelpGuideModal } from '../components/ui/HelpGuideModal';
+import { PlusCircle, Share2, Settings, Users, ExternalLink, MoreVertical, HelpCircle } from 'lucide-react';
 
 export default function AdminDashboard() {
   const isAdmin = useStore(state => state.isAdmin);
@@ -18,14 +19,22 @@ export default function AdminDashboard() {
   const [shareForm, setShareForm] = useState(null);
   const [openMenuId, setOpenMenuId] = useState(null);
   const [statusModalForm, setStatusModalForm] = useState(null);
+  const [guideModalOpen, setGuideModalOpen] = useState(false);
 
   if (!isAdmin) return <Navigate to="/admin/login" replace />;
 
   const getApplicationCount = (formId) => applications.filter(a => a.form_id === formId).length;
 
-  const getStatusBadge = (status) => {
+  const getStatusBadge = (form) => {
+    const status = form.status || 'open';
+    const count = getApplicationCount(form.id);
+    const isFull = form.capacity && count >= form.capacity;
+    
     const baseStyle = { padding: '4px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold', whiteSpace: 'nowrap', flexShrink: 0, marginTop: '2px' };
+    
     if (status === 'closed') return <span style={{ ...baseStyle, backgroundColor: '#FEE2E2', color: '#B91C1C' }}>모집 마감</span>;
+    if (isFull) return <span style={{ ...baseStyle, backgroundColor: '#FEF3C7', color: '#B45309' }}>정원 마감</span>;
+    
     return <span style={{ ...baseStyle, backgroundColor: '#D1FAE5', color: '#059669' }}>모집 중</span>;
   };
 
@@ -43,6 +52,9 @@ export default function AdminDashboard() {
           <span style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>현재 <b>{forms.length}개</b>의 행사를 관리하고 있습니다.</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <Button variant="ghost" onClick={() => setGuideModalOpen(true)} style={{ color: 'var(--color-primary)', border: '1px solid #E0E7FF', backgroundColor: '#EEF2FF', padding: '0.5rem 1rem' }}>
+            <HelpCircle size={18} style={{marginRight: '6px'}} /> 도움말
+          </Button>
           <span style={{ fontWeight: '500', backgroundColor: '#F3F4F6', padding: '0.5rem 1rem', borderRadius: '9999px', fontSize: '0.875rem' }}>
             👤 {adminUser?.user_metadata?.name || '관리자'}님 환영합니다
           </span>
@@ -72,7 +84,7 @@ export default function AdminDashboard() {
               <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem', position: 'relative' }}>
                   <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
-                    {getStatusBadge(form.status || 'open')}
+                    {getStatusBadge(form)}
                     <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--color-text-main)', lineHeight: '1.3' }}>{form.title}</h3>
                   </div>
                   <div style={{ position: 'relative' }}>
@@ -140,6 +152,9 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
+
+      {/* Help Guide Modal */}
+      {guideModalOpen && <HelpGuideModal onClose={() => setGuideModalOpen(false)} />}
     </div>
   );
 }
