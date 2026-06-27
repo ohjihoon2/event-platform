@@ -232,7 +232,7 @@ export default function ApplicationForm() {
                 </div>
               </div>
             )}
-            {form.fee && (
+            {form.is_paid !== false && form.fee && (
               <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
                 <CreditCard size={20} style={{ color: 'var(--color-primary)' }} />
                 <div>
@@ -290,7 +290,9 @@ export default function ApplicationForm() {
               <Input label="연락처 (필수)" name="phone" type="tel" value={formData.phone} onChange={handleInputChange} placeholder="010-1234-5678" required />
               <Input label="비밀번호 4자리 (필수)" name="password" type="password" value={formData.password} onChange={handleInputChange} placeholder="숫자 4자리" required maxLength={4} />
               <Input label="비밀번호 확인 (필수)" name="passwordConfirm" type="password" value={formData.passwordConfirm} onChange={handleInputChange} placeholder="비밀번호 재입력" required maxLength={4} />
-              <Input label="입금자명" name="depositName" value={formData.depositName} onChange={handleInputChange} placeholder="신청자와 다를 경우 입력" />
+              {form.is_paid !== false && (
+                <Input label="입금자명" name="depositName" value={formData.depositName} onChange={handleInputChange} placeholder="신청자와 다를 경우 입력" />
+              )}
             </div>
 
             {/* Custom Fields */}
@@ -364,7 +366,7 @@ export default function ApplicationForm() {
                   <span style={{ fontWeight: '500' }}>현재 상태</span>
                   {lookupResult.status === 'pending' ? (
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 8px', backgroundColor: '#FEF3C7', color: '#D97706', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 'bold' }}>
-                      <Clock size={14} /> 입금 대기
+                      <Clock size={14} /> {form.is_paid !== false ? '입금 대기' : '승인 대기'}
                     </span>
                   ) : (
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 8px', backgroundColor: '#D1FAE5', color: '#059669', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 'bold' }}>
@@ -379,10 +381,12 @@ export default function ApplicationForm() {
                       <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>이름 / 연락처 (수정 불가)</p>
                       <p style={{ fontWeight: '500' }}>{lookupResult.name} ({lookupResult.phone})</p>
                     </div>
-                    <div>
-                      <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>입금자명</p>
-                      <p style={{ fontWeight: '500' }}>{lookupResult.deposit_name || '-'}</p>
-                    </div>
+                    {form.is_paid !== false && (
+                      <div>
+                        <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>입금자명</p>
+                        <p style={{ fontWeight: '500' }}>{lookupResult.deposit_name || '-'}</p>
+                      </div>
+                    )}
                     {form.fields && form.fields.length > 0 && form.fields.map(f => (
                       <div key={f.id}>
                         <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>{f.label}</p>
@@ -399,7 +403,9 @@ export default function ApplicationForm() {
                     <div style={{ padding: '0.75rem', backgroundColor: '#F3F4F6', borderRadius: 'var(--radius-md)', fontSize: '0.875rem' }}>
                       <span style={{ color: 'var(--color-text-muted)' }}>이름과 연락처는 보안상 수정할 수 없습니다.</span>
                     </div>
-                    <Input label="입금자명" value={editData.depositName} onChange={e => setEditData({...editData, depositName: e.target.value})} />
+                    {form.is_paid !== false && (
+                      <Input label="입금자명" value={editData.depositName} onChange={e => setEditData({...editData, depositName: e.target.value})} />
+                    )}
                     
                     {form.fields && form.fields.map(field => (
                       <div key={field.id} className="input-wrapper input-full">

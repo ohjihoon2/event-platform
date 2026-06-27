@@ -78,12 +78,18 @@ export default function FormManagement() {
     e.preventDefault();
     if (!formData.name || !formData.phone) return alert('이름과 연락처는 필수입니다.');
 
+    let res;
     if (editingId) {
-      updateApplication(editingId, { ...formData, custom_data: customData });
+      res = await updateApplication(editingId, { ...formData, custom_data: customData });
     } else {
-      addApplication({ form_id: formId, ...formData, custom_data: customData }, true);
+      res = await addApplication({ form_id: formId, ...formData, custom_data: customData }, true);
     }
-    closeModal();
+
+    if (res && !res.success) {
+      alert('저장 실패: ' + (res.error?.message || res.error || '알 수 없는 오류'));
+    } else {
+      closeModal();
+    }
   };
 
   const handleDelete = (id) => {
@@ -128,7 +134,7 @@ export default function FormManagement() {
         </div>
         <div style={{ background: 'linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%)', padding: '2rem', borderRadius: '1.25rem', border: '1px solid #FDE68A', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)', position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', top: '-10px', right: '-10px', opacity: 0.1 }}><Clock size={100} /></div>
-          <p style={{ color: '#92400E', fontSize: '1rem', fontWeight: 'bold', marginBottom: '0.5rem', zIndex: 1 }}>입금 대기</p>
+          <p style={{ color: '#92400E', fontSize: '1rem', fontWeight: 'bold', marginBottom: '0.5rem', zIndex: 1 }}>{form.is_paid !== false ? '입금 대기' : '승인 대기'}</p>
           <p style={{ fontSize: '3rem', fontWeight: 'bold', color: '#B45309', zIndex: 1 }}>{pendingCount}</p>
         </div>
         <div style={{ background: 'linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%)', padding: '2rem', borderRadius: '1.25rem', border: '1px solid #A7F3D0', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)', position: 'relative', overflow: 'hidden' }}>
@@ -150,7 +156,7 @@ export default function FormManagement() {
                 <th style={{ padding: '1.25rem 1rem', fontWeight: '600', color: '#4B5563', fontSize: '0.875rem' }}>신청일시</th>
                 <th style={{ padding: '1.25rem 1rem', fontWeight: '600', color: '#4B5563', fontSize: '0.875rem' }}>이름</th>
                 <th style={{ padding: '1.25rem 1rem', fontWeight: '600', color: '#4B5563', fontSize: '0.875rem' }}>연락처</th>
-                <th style={{ padding: '1.25rem 1rem', fontWeight: '600', color: '#4B5563', fontSize: '0.875rem' }}>입금자명</th>
+                {form.is_paid !== false && <th style={{ padding: '1.25rem 1rem', fontWeight: '600', color: '#4B5563', fontSize: '0.875rem' }}>입금자명</th>}
                 {form.fields && form.fields.map(f => (
                   <th key={f.id} style={{ padding: '1.25rem 1rem', fontWeight: '600', color: '#4B5563', fontSize: '0.875rem' }}>{f.label}</th>
                 ))}
@@ -175,14 +181,14 @@ export default function FormManagement() {
                     <td style={{ padding: '1rem', fontSize: '0.875rem' }}>{new Date(app.created_at).toLocaleString()}</td>
                     <td style={{ padding: '1rem', fontWeight: '500' }}>{app.name}</td>
                     <td style={{ padding: '1rem', fontSize: '0.875rem' }}>{app.phone}</td>
-                    <td style={{ padding: '1rem', fontSize: '0.875rem' }}>{app.deposit_name || '-'}</td>
+                    {form.is_paid !== false && <td style={{ padding: '1rem', fontSize: '0.875rem' }}>{app.deposit_name || '-'}</td>}
                     {form.fields && form.fields.map(f => (
                       <td key={f.id} style={{ padding: '1rem', fontSize: '0.875rem' }}>{app.custom_data?.[f.id] || '-'}</td>
                     ))}
                     <td style={{ padding: '1rem' }}>
                       {app.status === 'pending' ? (
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 8px', backgroundColor: '#FEF3C7', color: '#D97706', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 'bold' }}>
-                          <Clock size={14} /> 입금 대기
+                          <Clock size={14} /> {form.is_paid !== false ? '입금 대기' : '승인 대기'}
                         </span>
                       ) : (
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 8px', backgroundColor: '#D1FAE5', color: '#059669', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 'bold' }}>
@@ -193,7 +199,7 @@ export default function FormManagement() {
                     <td style={{ padding: '1rem' }}>
                       {app.status === 'pending' ? (
                         <button onClick={() => updateApplicationStatus(app.id, 'confirmed')} style={{ backgroundColor: '#F3F4F6', color: '#111827', border: '1px solid #D1D5DB', padding: '6px 12px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}>
-                          입금 확인
+                          {form.is_paid !== false ? '입금 확인' : '승인 확인'}
                         </button>
                       ) : (
                         <button onClick={() => updateApplicationStatus(app.id, 'pending')} style={{ backgroundColor: 'white', color: '#6B7280', border: '1px solid #E5E7EB', padding: '6px 12px', borderRadius: '6px', fontSize: '0.75rem', cursor: 'pointer', transition: 'all 0.2s' }}>
@@ -233,13 +239,15 @@ export default function FormManagement() {
             <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <Input label="이름" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required />
               <Input label="연락처" value={formData.phone} onChange={e => setFormData({...formData, phone: formatPhoneNumber(e.target.value)})} required />
-              <Input label="입금자명" value={formData.deposit_name} onChange={e => setFormData({...formData, deposit_name: e.target.value})} />
+              {form.is_paid !== false && (
+                <Input label="입금자명" value={formData.deposit_name} onChange={e => setFormData({...formData, deposit_name: e.target.value})} />
+              )}
               
               <div className="input-wrapper input-full">
                 <label className="input-label">상태</label>
                 <select className="input-field" value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})}>
                   <option value="confirmed">확정 완료</option>
-                  <option value="pending">입금 대기</option>
+                  <option value="pending">{form.is_paid !== false ? '입금 대기' : '승인 대기'}</option>
                 </select>
               </div>
 

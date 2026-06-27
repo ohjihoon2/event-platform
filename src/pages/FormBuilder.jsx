@@ -21,6 +21,7 @@ export default function FormBuilder() {
   // Basic info state
   const [basicInfo, setBasicInfo] = useState({
     title: existingForm?.title || '',
+    is_paid: existingForm?.is_paid !== undefined ? existingForm.is_paid : true,
     location: existingForm?.location || '',
     date: existingForm?.date || '',
     fee: existingForm?.fee || '',
@@ -121,10 +122,35 @@ export default function FormBuilder() {
               <Input label="장소" name="location" value={basicInfo.location} onChange={handleBasicInfoChange} placeholder="행사 장소 입력" />
             </div>
             <div className="form-row">
-              <Input label="참가비" name="fee" type="number" value={basicInfo.fee} onChange={handleBasicInfoChange} placeholder="숫자만 입력 (예: 45000)" />
-              <Input label="모집 정원(명)" name="capacity" type="number" value={basicInfo.capacity} onChange={handleBasicInfoChange} placeholder="숫자만 입력 (예: 50)" />
+              <div className="input-wrapper input-full">
+                <label className="input-label">행사 유형</label>
+                <div style={{ display: 'flex', gap: '2rem', padding: '0.75rem', backgroundColor: 'var(--color-bg)', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                    <input type="radio" name="is_paid" checked={basicInfo.is_paid === false} onChange={() => setBasicInfo({...basicInfo, is_paid: false})} style={{ width: '18px', height: '18px', accentColor: 'var(--color-primary)' }} />
+                    <span style={{ fontSize: '1rem', fontWeight: '500', color: basicInfo.is_paid === false ? 'var(--color-primary)' : 'var(--color-text-main)' }}>무료 행사</span>
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                    <input type="radio" name="is_paid" checked={basicInfo.is_paid === true} onChange={() => setBasicInfo({...basicInfo, is_paid: true})} style={{ width: '18px', height: '18px', accentColor: 'var(--color-primary)' }} />
+                    <span style={{ fontSize: '1rem', fontWeight: '500', color: basicInfo.is_paid === true ? 'var(--color-primary)' : 'var(--color-text-main)' }}>유료 행사</span>
+                  </label>
+                </div>
+              </div>
             </div>
-            <Input label="입금 계좌번호" name="bank_account" value={basicInfo.bank_account} onChange={handleBasicInfoChange} placeholder="예: 국민은행 123-456-789 홍길동" />
+
+            {basicInfo.is_paid ? (
+              <>
+                <div className="form-row">
+                  <Input label="참가비 (필수)" name="fee" type="number" value={basicInfo.fee} onChange={handleBasicInfoChange} placeholder="숫자만 입력 (예: 45000)" required />
+                  <Input label="모집 정원(명)" name="capacity" type="number" value={basicInfo.capacity} onChange={handleBasicInfoChange} placeholder="숫자만 입력 (예: 50)" />
+                </div>
+                <Input label="입금 계좌번호 (필수)" name="bank_account" value={basicInfo.bank_account} onChange={handleBasicInfoChange} placeholder="예: 국민은행 123-456-789 홍길동" required />
+              </>
+            ) : (
+              <div className="form-row">
+                <Input label="모집 정원(명)" name="capacity" type="number" value={basicInfo.capacity} onChange={handleBasicInfoChange} placeholder="숫자만 입력 (예: 50)" />
+                <div style={{ flex: 1 }}></div>
+              </div>
+            )}
             <div className="input-wrapper input-full">
               <label className="input-label">행사 상세 내용</label>
               <textarea 
@@ -158,7 +184,7 @@ export default function FormBuilder() {
             {/* Display default fields that are always collected */}
             <div style={{ padding: '1rem', backgroundColor: 'var(--color-bg)', borderRadius: 'var(--radius-md)', border: '1px dashed var(--color-border)' }}>
               <p style={{ fontSize: '0.875rem', fontWeight: '500', color: 'var(--color-text-main)' }}>🔒 기본 수집 항목 (수정 불가)</p>
-              <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', marginTop: '0.5rem' }}>참가자 이름, 연락처, 신청확인용 4자리 비밀번호, 입금자명</p>
+              <p style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)', marginTop: '0.5rem' }}>참가자 이름, 연락처, 신청확인용 4자리 비밀번호{basicInfo.is_paid ? ', 입금자명' : ''}</p>
             </div>
 
             {fields.length > 0 && <div style={{ height: '1px', backgroundColor: 'var(--color-border)', margin: '1rem 0' }}></div>}
