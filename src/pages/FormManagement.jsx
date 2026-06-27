@@ -31,7 +31,7 @@ export default function FormManagement() {
   }, [formId, form, fetchApplications]);
   
   // Modal Form State
-  const [formData, setFormData] = useState({ name: '', phone: '', password: '0000', deposit_name: '', status: 'confirmed' });
+  const [formData, setFormData] = useState({ name: '', phone: '', password: '0000', deposit_name: '', status: 'confirmed', notes: '' });
   const [customData, setCustomData] = useState({});
 
   if (!form) return <div style={{ padding: '2rem' }}>신청서를 찾을 수 없습니다.</div>;
@@ -58,12 +58,13 @@ export default function FormManagement() {
         phone: app.phone,
         password: app.password,
         deposit_name: app.deposit_name || '',
-        status: app.status
+        status: app.status,
+        notes: app.notes || ''
       });
       setCustomData(app.custom_data || {});
     } else {
       setEditingId(null);
-      setFormData({ name: '', phone: '', password: '0000', deposit_name: '', status: 'confirmed' });
+      setFormData({ name: '', phone: '', password: '0000', deposit_name: '', status: 'confirmed', notes: '' });
       setCustomData({});
     }
     setIsModalOpen(true);
@@ -160,6 +161,7 @@ export default function FormManagement() {
                 {form.fields && form.fields.map(f => (
                   <th key={f.id} style={{ padding: '1.25rem 1rem', fontWeight: '600', color: '#4B5563', fontSize: '0.875rem' }}>{f.label}</th>
                 ))}
+                <th style={{ padding: '1.25rem 1rem', fontWeight: '600', color: '#4B5563', fontSize: '0.875rem' }}>비고</th>
                 <th style={{ padding: '1.25rem 1rem', fontWeight: '600', color: '#4B5563', fontSize: '0.875rem' }}>상태</th>
                 <th style={{ padding: '1.25rem 1rem', fontWeight: '600', color: '#4B5563', fontSize: '0.875rem' }}>상태 변경</th>
                 <th style={{ padding: '1.25rem 1rem', fontWeight: '600', color: '#4B5563', fontSize: '0.875rem', textAlign: 'center' }}>관리</th>
@@ -185,6 +187,9 @@ export default function FormManagement() {
                     {form.fields && form.fields.map(f => (
                       <td key={f.id} style={{ padding: '1rem', fontSize: '0.875rem' }}>{app.custom_data?.[f.id] || '-'}</td>
                     ))}
+                    <td style={{ padding: '1rem', fontSize: '0.875rem', maxWidth: '150px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={app.notes}>
+                      {app.notes || '-'}
+                    </td>
                     <td style={{ padding: '1rem' }}>
                       {app.status === 'pending' ? (
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 8px', backgroundColor: '#FEF3C7', color: '#D97706', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 'bold' }}>
@@ -249,6 +254,17 @@ export default function FormManagement() {
                   <option value="confirmed">확정 완료</option>
                   <option value="pending">{form.is_paid !== false ? '입금 대기' : '승인 대기'}</option>
                 </select>
+              </div>
+
+              <div className="input-wrapper input-full">
+                <label className="input-label">관리자 비고 (메모)</label>
+                <textarea 
+                  className="input-field" 
+                  rows="2"
+                  value={formData.notes} 
+                  onChange={e => setFormData({...formData, notes: e.target.value})} 
+                  placeholder="관리자만 볼 수 있는 메모를 남겨주세요." 
+                />
               </div>
 
               {form.fields && form.fields.length > 0 && (
